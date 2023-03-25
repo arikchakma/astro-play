@@ -1,0 +1,32 @@
+---
+export async function getStaticPaths() {
+  const allData = await Astro.glob("../../data/**/*.md");
+
+  const paths = allData.map(({ file, url, ...page }) => {
+    const locale = file.match(/\/data\/(.*?)\//)![1];
+    const slug = file.match(/\/data\/.*?\/(.*?)\.md/)![1];
+    return {
+      params: { locale, slug },
+      props: {
+        page: {
+          ...page,
+          locale,
+          slug,
+        },
+      },
+    };
+  });
+  // Filter out any paths with an undefined locale or slug.
+  return paths.filter(({ params }) => !!params.locale && !!params.slug);
+}
+
+const { page } = Astro.props;
+const { Content, slug, locale } = page;
+---
+
+<div>
+  <a href="/">Home</a>
+  <a href={`/${locale === "en" ? "de" : "en"}/${slug}`}>Diff</a>
+  <h1>Hello, world! from {slug}</h1>
+  <Content />
+</div>
